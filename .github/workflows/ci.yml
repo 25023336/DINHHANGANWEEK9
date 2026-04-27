@@ -1,15 +1,21 @@
-name: CI - Maven Build
+name: Java CI Matrix
 
 on:
   push:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -19,12 +25,5 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn -B clean verify
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bai9_3-jar
-          path: target/*.jar
-          if-no-files-found: error
+      - name: Run tests
+        run: mvn -B test
